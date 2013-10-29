@@ -20,7 +20,7 @@ function updateTime() {
 	element.html(str);
 }
 
-element.click(function() {
+function syncFunction() {
 	//console.log('sync');
 	clearInterval(syncInterval);
 	clearInterval(trySyncInterval);
@@ -45,5 +45,14 @@ element.click(function() {
 		
 		updateTime();
 		syncInterval = setInterval(updateTime, 1000);
-	}, 50);
-});
+	}, 100);
+}
+
+element.click(syncFunction);
+
+//Hack in to the method that is called when [Start Annihilation] is clicked
+var oldAck = model.ackMessage;
+model.ackMessage = function() {
+    oldAck();
+    syncFunction();
+};
