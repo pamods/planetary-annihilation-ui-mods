@@ -1,6 +1,64 @@
-#in_game_timer  {
-	position: fixed;
-	right: 50px;
-	font-size: 40px;
-	bottom: 2px;
+#remindertimers {
+	margin-top: 10px;
+	display: inline-block;
+}
+
+#remindertimers .timer, #remindertimers .managebutton, #remindertimers .quicktimer {
+	background-color: rgba(0,0,0,0.8);
+	color: white;
+	border: 1px solid #666;
+	padding: 3px;
+	border-radius: 4px;
+}
+
+#remindertimers .timer {
+	margin-top: 1px;
+}
+
+#remindertimers .timer, #remindertimers .managebutton {
+	cursor: pointer;
+	-webkit-user-select: none;
+	user-select: none;
+}
+
+#remindertimers .managebutton, #remindertimers .quicktimer {
+	margin-top: 5px;
+}
+
+#remindertimers .managebutton {
+	text-align: center;
+}
+
+#remindertimers .quicktimer input[type=text] {
+	width: 93px;
+	border: 1px solid #666;
+}
+#remindertimers .quicktimer button {
+	padding-left: 2px;
+	padding-right: 2px;
+	margin: 1px;
+	cursor: pointer;
+
+	border: 1px solid #666;
+	background-color: #444;
+	color: white;
+}
+
+#remindertimer_manage {
+	position: absolute; right: 0;
+	background-color: rgba(0,0,0,0.8);
+	border: #666 1px solid;
+	padding: 3px;
+	border-radius: 4px;
+}
+#remindertimer_manage, #remindertimer_manage th, #remindertimer_manage td {
+	color: white;
+}
+
+#remindertimer_manage th {
+	text-align: right;
+}
+
+#remindertimer_manage input[type=number] {
+	width: 40px;
 }
