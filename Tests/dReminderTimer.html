@@ -1,0 +1,50 @@
+<html>
+<head>
+<script type='text/javascript' src='knockout-3.0.0.debug.js'></script>
+<script type='text/javascript' src='jquery-2.0.3.js'></script>
+
+<script type='text/javascript'>
+	window.model = {
+		ackMessage: function() {
+			console.log('model.ackMessage()');
+		},
+		
+		currentTimeInSeconds: function() {
+			return 0;
+		}
+	};
+	
+	window.api = {
+		time: {
+			control: function() {
+				console.log('api.time.control()');
+			},
+			resume: function () {
+				console.log('api.time.resume()');
+			}
+		}
+	}
+	
+	$(function() {
+		model.ackMessage();
+	});
+
+	//To kick off the timer, run this in a console:
+	// window.model.currentTimeInSeconds = function() { return 10; }
+</script>
+<link href="../dReminderTimer/dReminderTimer.css" type="text/css" rel="stylesheet" />
+
+<style>
+	body {
+		background-color: grey;
+	}
+</style>
+</head>
+
+<body>
+	abc
+
+	<!-- needs to happen after body exists -->
+	<script type='text/javascript' src='../dReminderTimer/dReminderTimer.js'></script>
+</body>
+</html>
