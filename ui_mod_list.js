@@ -29,6 +29,11 @@ var scene_mod_list = {'connect_to_game': [
 	//Reminders	
 	'../../mods/dReminderTimer/dReminderTimer.css',
 	'../../mods/dReminderTimer/dReminderTimer.js',
+	
+	//Hide for casting
+	'../../mods/dHideCast/dHideCast.css',
+	'../../mods/dHideCast/dHideCast.js',
+	
 ],
 'load_planet': [
 
