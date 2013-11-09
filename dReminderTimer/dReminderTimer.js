@@ -1,18 +1,28 @@
-var reminderDef = function (name, time, repeat, audio, visible, hasConfirm) {
-	this.name = ko.observable(name);
-	this.time = ko.observable(time);
-	this.repeat = repeat;
-	this.audio = audio;
-	this.visible = visible;
-	this.hasConfirm = hasConfirm;
+var ReminderDef = function (name, time, repeat, visible, hasConfirm, audio) {
+	this.name = ko.observable(name || 'New Timer');
+	this.time = ko.observable(time || 0);
+	this.repeat = ko.observable(repeat || false);
+	this.visible = ko.observable(visible || true);
+	this.hasConfirm = ko.observable(hasConfirm || true);
+	this.audio = ko.observable(audio || false);
+
+	this.timeMins = ko.observable(parseInt(this.time() / 60));
+	this.timeSecs = ko.observable(this.time() % 60);
+
+	this.timeMins.subscribe(this.recalcTime, this);
+	this.timeSecs.subscribe(this.recalcTime, this);
 };
+ReminderDef.prototype.recalcTime = function () {
+	this.time(this.timeMins() * 60 + this.timeSecs());
+};
+
 
 model.reminderTimer = {
 
 	timers: ko.observableArray([
-		{ name: "Scout More", time: 123, active: ko.observable(true), text: ko.observable('(mm:ss) Scout More') },
-		{ name: "Check Nuke", time: 143, active: ko.observable(false), text: ko.observable('(mm:ss) CN') },
-		{ name: "Hide Comm", time: 179, active: ko.observable(false), text: ko.observable('(mm:ss) fpoksf') }
+		new ReminderDef('Scout More', 123),
+		new ReminderDef('Check Nuke', 54),
+		new ReminderDef('Hide Comm', 179)
 	]),
 
 	selectedTimer: ko.observable(),
@@ -27,22 +37,20 @@ model.reminderTimer = {
 				'<h1>Manage Reminders</h1>' +
 				'<table>' +
 					'<tr><th>Select Reminder</th><td>' +
-					'<select data-bind="options: model.reminderTimer.timers, optionsText: \'name\', value: model.reminderTimer.selectedTimer">' +
-//					'<!-- ko foreach:  -->' +
-	//					'<option data-bind="text: name, value: $index">Reminder A</option>' +
-		//			'<!-- /ko -->' +
-					'</select>' +
+					'<select data-bind="options: model.reminderTimer.timers, optionsText: \'name\', value: model.reminderTimer.selectedTimer"></select>' +
 					'<button>+</button>' +
 					'</td></tr>' +
 					'<!-- ko if: model.reminderTimer.selectedTimer -->' +
-						'<tr><th>Name</th><td><input /></td></tr>' +
-						'<tr><th>Time</th><td><input type="number" value="0" />:<input type="number" value="0"/> (mm:ss)</td></tr>' +
+						'<tr><th>Name</th><td><input data-bind="value: model.reminderTimer.selectedTimer().name" /></td></tr>' +
+						'<tr><th>Time</th><td>' +
+							'<input data-bind="value: model.reminderTimer.selectedTimer().timeMins" type="number" />:' +
+							'<input  data-bind="value: model.reminderTimer.selectedTimer().timeSecs" type="number" /> (mm:ss)</td></tr>' +
 						'<tr><td colspan="2">When this timer expires, do the following</td></tr>' +
-						'<tr><th>Repeat</th><td><input type="checkbox" /> Repeat</td></tr>' +
-						'<tr><th>Visible</th><td><input type="checkbox" /> Show a message</td></tr>' +
-						'<tr><th>Confirm</th><td><input type="checkbox" /> Show message until confirmed</td></tr>' +
-						'<tr><th>Audio</th><td><input type="checkbox" /> Play an audio queue</td></tr>' +
-						'<tr><th></th><td><button>Save</button> <button>Delete</button></td></tr>' +
+						'<tr><th>Repeat</th><td><input data-bind="checked: model.reminderTimer.selectedTimer().repeat" type="checkbox" /> Repeat</td></tr>' +
+						'<tr><th>Visible</th><td><input data-bind="checked: model.reminderTimer.selectedTimer().visible" type="checkbox" /> Show a message</td></tr>' +
+						'<tr><th>Confirm</th><td><input data-bind="checked: model.reminderTimer.selectedTimer().hasConfirm" type="checkbox" /> Show message until confirmed</td></tr>' +
+						'<tr><th>Audio</th><td><input data-bind="checked: model.reminderTimer.selectedTimer().audio" type="checkbox" /> Play an audio queue</td></tr>' +
+						'<tr><th></th><td><button>Delete</button></td></tr>' +
 					'<!-- /ko -->' +
 				'</table>' +
 			'</div>');
@@ -51,7 +59,7 @@ model.reminderTimer = {
 			'<div id="remindertimers">' +
 
 				'<!-- ko foreach: model.reminderTimer.timers -->' +
-					'<div data-bind="click: model.reminderTimer.clickTimer, text: text" class="timer">FIXME</div>' +
+					'<div data-bind="click: model.reminderTimer.clickTimer, text: name" class="timer">FIXME</div>' +
 				'<!-- /ko -->' +
 
 				'<div class="managebutton">Manage</div>' +
