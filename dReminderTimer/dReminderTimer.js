@@ -60,17 +60,14 @@ ReminderDef.prototype.tick = function () {
 
 model.reminderTimer = {
 
-	timers: ko.observableArray([
-		new ReminderDef('Scout More', 123),
-		new ReminderDef('Check Nuke', 5),
-		new ReminderDef('Hide Comm', 179)
-	]),
+	timers: ko.observableArray(),
 
 	selectedTimer: ko.observable(),
 
 	manageVisible: ko.observable(false),
 
 	init: function () {
+		this.load();
 		if (this.timers().length > 0) {
 			this.selectedTimer(this.timers()[0]);
 		}
@@ -126,9 +123,6 @@ model.reminderTimer = {
 		this.timersEl.prepend(this.manage);
 		$('.div_player_list_panel').append(this.timersEl);
 
-
-		this.selectedTimer.subscribe(this.selectChanged, this);
-
 		//Try really hard not to retain focus so we don't break keyboard shortcuts
 		$('select', this.container).change(this.blurAll);
 		$(':checkbox', this.container).click(this.blurAll);
@@ -151,6 +145,10 @@ model.reminderTimer = {
 
 	toggleManage: function () {
 		this.manageVisible(!this.manageVisible());
+
+		if (!this.manageVisible()) {
+			this.save();
+		}
 	},
 	addTimer: function () {
 		var timer = new ReminderDef();
@@ -165,9 +163,6 @@ model.reminderTimer = {
 			this.selectedTimer(false);
 		}
 	},
-	blurAll: function () {
-		$(document.activeElement).blur();
-	},
 
 	clickTimer: function (e) {
 		e.isActive(!e.isActive());
@@ -177,9 +172,30 @@ model.reminderTimer = {
 		console.log('quick ' + e);
 	},
 
-	selectChanged: function (e, e2, e3) {
-		console.log('selectChanged');
-		console.log(e);
+	save: function () {
+		var data = this.timers.slice();
+		for (var i = 0; i < data.length; i++) {
+			data[i] = data[i].toJson();
+		}
+
+		window.localStorage.setItem('dReminderTimer_timers', JSON.stringify(data));
+	},
+	load: function () {
+		var data = window.localStorage.getItem('dReminderTimer_timers');
+		if (!data) {
+			//set a default
+			this.timers.push(new ReminderDef('Scout More!!!', 120));
+			return;
+		}
+
+		data = JSON.parse(data);
+		data.forEach(function (item) {
+			this.timers.push(new ReminderDef(item.name, item.time, item.repeat, item.visible, item.hasConfirm, item.audio));
+		}, this);
+	},
+
+	blurAll: function () {
+		$(document.activeElement).blur();
 	}
 };
 model.reminderTimer.init();
