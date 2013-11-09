@@ -44,9 +44,9 @@ ReminderDef.prototype.toJson = function () {
 ReminderDef.prototype.tick = function () {
 	this.currentTime(this.currentTime() - 1);
 
-	if (this.currentTime <= 0) {
+	if (this.currentTime() <= 0) {
 		//Trigger!
-		if (this.repeat) {
+		if (this.repeat()) {
 			this.currentTime(this.time());
 		} else {
 			this.isActive(false);
@@ -62,7 +62,7 @@ model.reminderTimer = {
 
 	timers: ko.observableArray([
 		new ReminderDef('Scout More', 123),
-		new ReminderDef('Check Nuke', 54),
+		new ReminderDef('Check Nuke', 5),
 		new ReminderDef('Hide Comm', 179)
 	]),
 
