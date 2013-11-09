@@ -26,6 +26,9 @@ var scene_mod_list = {'connect_to_game': [
 	'../../mods/dBetterSystemView/dBetterSystemView.css',
 	'../../mods/dBetterSystemView/dBetterSystemView.js',
 
+	//Reminders	
+	'../../mods/dReminderTimer/dReminderTimer.css',
+	'../../mods/dReminderTimer/dReminderTimer.js',
 ],
 'load_planet': [
 
