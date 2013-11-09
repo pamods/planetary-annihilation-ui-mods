@@ -68,34 +68,39 @@ model.reminderTimer = {
 
 	selectedTimer: ko.observable(),
 
-
+	manageVisible: ko.observable(false),
 
 	init: function () {
 		if (this.timers().length > 0) {
 			this.selectedTimer(this.timers()[0]);
 		}
 
+		//Proxy these so they work right with ko callbacks
+		this.toggleManage = $.proxy(this.toggleManage, this);
+		this.addTimer = $.proxy(this.addTimer, this);
+		this.removeTimer = $.proxy(this.removeTimer, this);
+
 		//Create div, add to page
 		this.manage = $(
-			'<div id="remindertimer_manage">' +
-				'<div class="close">X</div>' +
+			'<div id="remindertimer_manage" data-bind="visible: model.reminderTimer.manageVisible">' +
+				'<div class="close" data-bind="click: model.reminderTimer.toggleManage">X</div>' +
 				'<h1>Manage Reminders</h1>' +
 				'<table>' +
 					'<tr><th>Select Reminder</th><td>' +
 					'<select data-bind="options: model.reminderTimer.timers, optionsText: \'name\', value: model.reminderTimer.selectedTimer"></select>' +
-					'<button>+</button>' +
+					'<button data-bind="click: model.reminderTimer.addTimer">+</button>' +
+					'<button data-bind="click: model.reminderTimer.removeTimer">-</button>' +
 					'</td></tr>' +
 					'<!-- ko if: model.reminderTimer.selectedTimer -->' +
 						'<tr><th>Name</th><td><input data-bind="value: model.reminderTimer.selectedTimer().name" /></td></tr>' +
 						'<tr><th>Time</th><td>' +
-							'<input data-bind="value: model.reminderTimer.selectedTimer().timeMins" type="number" />:' +
-							'<input  data-bind="value: model.reminderTimer.selectedTimer().timeSecs" type="number" /> (mm:ss)</td></tr>' +
+							'<input data-bind="value: model.reminderTimer.selectedTimer().timeMins" type="number" min="0"/>:' +
+							'<input  data-bind="value: model.reminderTimer.selectedTimer().timeSecs" type="number" min="0" max="59" step="10" /> (mm:ss)</td></tr>' +
 						'<tr><td colspan="2">When this timer expires, do the following</td></tr>' +
 						'<tr><th>Repeat</th><td><input data-bind="checked: model.reminderTimer.selectedTimer().repeat" type="checkbox" /> Repeat</td></tr>' +
 						'<tr><th>Visible</th><td><input data-bind="checked: model.reminderTimer.selectedTimer().visible" type="checkbox" /> Show a message</td></tr>' +
 						'<tr><th>Confirm</th><td><input data-bind="checked: model.reminderTimer.selectedTimer().hasConfirm" type="checkbox" /> Show message until confirmed</td></tr>' +
 						'<tr><th>Audio</th><td><input data-bind="checked: model.reminderTimer.selectedTimer().audio" type="checkbox" /> Play an audio queue</td></tr>' +
-						'<tr><th></th><td><button>Delete</button></td></tr>' +
 					'<!-- /ko -->' +
 				'</table>' +
 			'</div>');
@@ -107,7 +112,7 @@ model.reminderTimer = {
 					'<div data-bind="click: model.reminderTimer.clickTimer, text: text" class="timer">FIXME</div>' +
 				'<!-- /ko -->' +
 
-				'<div class="managebutton">Manage</div>' +
+				'<div class="managebutton" data-bind="click: model.reminderTimer.toggleManage">Manage</div>' +
 				'<div class="quicktimer">' +
 					'Quick <input type="text" /><br/>' +
 					'<button data-bind="click: function() { model.reminderTimer.clickQuick(1); }">1m</button>' +
@@ -118,7 +123,7 @@ model.reminderTimer = {
 				'</div>' +
 			'</div>');
 
-		$('body').append(this.manage);
+		this.timersEl.prepend(this.manage);
 		$('.div_player_list_panel').append(this.timersEl);
 
 
@@ -144,6 +149,22 @@ model.reminderTimer = {
 		}, this);
 	},
 
+	toggleManage: function () {
+		this.manageVisible(!this.manageVisible());
+	},
+	addTimer: function () {
+		var timer = new ReminderDef();
+		this.timers.push(timer);
+		this.selectedTimer(timer);
+	},
+	removeTimer: function () {
+		this.timers.remove(this.selectedTimer());
+		if (this.timers().length > 0) {
+			this.selectedTimer(this.timers()[0]);
+		} else {
+			this.selectedTimer(false);
+		}
+	},
 	blurAll: function () {
 		$(document.activeElement).blur();
 	},

@@ -45,7 +45,8 @@
 }
 
 #remindertimer_manage {
-	position: absolute; right: 0;
+	position: absolute;
+	left: 0;
 	background-color: rgba(0,0,0,0.8);
 	border: #666 1px solid;
 	padding: 3px;
@@ -59,6 +60,7 @@
 	top: 0;
 	right: 4px;
 	font-size: 30px;
+	cursor: pointer;
 }
 
 #remindertimer_manage th {
