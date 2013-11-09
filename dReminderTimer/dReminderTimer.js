@@ -9,10 +9,10 @@ var formatSeconds = function (seconds) {
 var ReminderDef = function (name, time, repeat, visible, hasConfirm, audio) {
 	this.name = ko.observable(name || 'New Timer');
 	this.time = ko.observable(time || 0);
-	this.repeat = ko.observable(repeat || false);
-	this.visible = ko.observable(visible || true);
-	this.hasConfirm = ko.observable(hasConfirm || true);
-	this.audio = ko.observable(audio || false);
+	this.repeat = ko.observable(repeat);
+	this.visible = ko.observable(visible);
+	this.hasConfirm = ko.observable(hasConfirm);
+	this.audio = ko.observable(audio);
 
 	this.isActive = ko.observable(false);
 	this.currentTime = ko.observable(0);
@@ -21,6 +21,9 @@ var ReminderDef = function (name, time, repeat, visible, hasConfirm, audio) {
 	this.timeSecs = ko.observable(this.time() % 60);
 
 	this.text = ko.computed(function () {
+		if (!this.isActive()) {
+			return '[' + formatSeconds(this.time()) + '] ' + this.name();
+		}
 		return '(' + formatSeconds(this.currentTime()) + ') ' + this.name();
 	}, this);
 
@@ -52,7 +55,29 @@ ReminderDef.prototype.tick = function () {
 			this.isActive(false);
 		}
 
-		//TODO: Visible / audio
+		if (this.audio()) {
+			if (this.audio)
+				model.reminderTimer.sound.play();
+		}
+		if (this.visible()) {
+			if (this.hasConfirm()) {
+				var div = $(
+					'<div class="message">' +
+						'<span class="text">' + this.name() + '</span>' +
+						'<button>Close</button>' +
+					'</div>');
+				model.reminderTimer.messageContainer.prepend(div);
+				$('button', div).click(function () {
+					div.remove();
+				});
+			} else {
+				var div = $('<div class="message"><span class="text">' + this.name() + '</span></div>');
+				model.reminderTimer.messageContainer.prepend(div);
+				setTimeout(function () {
+					div.remove();
+				}, 3000);
+			}
+		}
 
 		console.log('trigger: ' + this.name());
 	}
@@ -61,10 +86,15 @@ ReminderDef.prototype.tick = function () {
 model.reminderTimer = {
 
 	timers: ko.observableArray(),
+	quickTimers: ko.observableArray(),
 
 	selectedTimer: ko.observable(),
 
 	manageVisible: ko.observable(false),
+
+	quickTimerText: ko.observable('Do Something!'),
+
+	sound: new Audio('../../mods/dReminderTimer/sound.wav'),
 
 	init: function () {
 		this.load();
@@ -76,6 +106,8 @@ model.reminderTimer = {
 		this.toggleManage = $.proxy(this.toggleManage, this);
 		this.addTimer = $.proxy(this.addTimer, this);
 		this.removeTimer = $.proxy(this.removeTimer, this);
+
+		this.messageContainer = $('<div class="remindertimer_messages"></div>');
 
 		//Create div, add to page
 		this.manage = $(
@@ -111,17 +143,21 @@ model.reminderTimer = {
 
 				'<div class="managebutton" data-bind="click: model.reminderTimer.toggleManage">Manage</div>' +
 				'<div class="quicktimer">' +
-					'Quick <input type="text" /><br/>' +
+					'Quick <input type="text" data-bind="value: model.reminderTimer.quickTimerText" /><br/>' +
 					'<button data-bind="click: function() { model.reminderTimer.clickQuick(1); }">1m</button>' +
 					'<button data-bind="click: function() { model.reminderTimer.clickQuick(2); }">2m</button>' +
 					'<button data-bind="click: function() { model.reminderTimer.clickQuick(3); }">3m</button>' +
 					'<button data-bind="click: function() { model.reminderTimer.clickQuick(4); }">4m</button>' +
 					'<button data-bind="click: function() { model.reminderTimer.clickQuick(5); }">5m</button>' +
 				'</div>' +
+				'<!-- ko foreach: model.reminderTimer.quickTimers -->' +
+					'<div data-bind="click: model.reminderTimer.clickQuickTimer, text: text" class="timer">FIXME</div>' +
+				'<!-- /ko -->' +
 			'</div>');
 
 		this.timersEl.prepend(this.manage);
 		$('.div_player_list_panel').append(this.timersEl);
+		$(document.body).append(this.messageContainer);
 
 		//Try really hard not to retain focus so we don't break keyboard shortcuts
 		$('select', this.container).change(this.blurAll);
@@ -139,6 +175,17 @@ model.reminderTimer = {
 		this.timers().forEach(function (timer) {
 			if (timer.isActive()) {
 				timer.tick();
+			}
+		}, this);
+
+
+		this.quickTimers().forEach(function (timer) {
+			if (timer.isActive()) {
+				timer.tick();
+			}
+
+			if (!timer.isActive()) {
+				this.quickTimers.remove(timer);
 			}
 		}, this);
 	},
@@ -168,8 +215,12 @@ model.reminderTimer = {
 		e.isActive(!e.isActive());
 	},
 
-	clickQuick: function (e) {
-		console.log('quick ' + e);
+	clickQuickTimer: function (e) {
+	},
+	clickQuick: function (time) {
+		var timer = new ReminderDef(this.quickTimerText(), time * 60, false, true, false, true);
+		timer.isActive(true);
+		this.quickTimers.push(timer);
 	},
 
 	save: function () {
