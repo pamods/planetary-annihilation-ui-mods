@@ -54,6 +54,12 @@
 #remindertimer_manage, #remindertimer_manage th, #remindertimer_manage td {
 	color: white;
 }
+#remindertimer_manage .close {
+	position: absolute;
+	top: 0;
+	right: 4px;
+	font-size: 30px;
+}
 
 #remindertimer_manage th {
 	text-align: right;
