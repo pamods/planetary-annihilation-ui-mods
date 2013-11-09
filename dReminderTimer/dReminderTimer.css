@@ -3,6 +3,10 @@
 	display: inline-block;
 }
 
+.hide-for-cast #remindertimers {
+	display: none;
+}
+
 #remindertimers .timer, #remindertimers .managebutton, #remindertimers .quicktimer {
 	background-color: rgba(0,0,0,0.8);
 	color: white;
