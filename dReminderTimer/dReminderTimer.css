@@ -51,6 +51,7 @@
 	border: #666 1px solid;
 	padding: 3px;
 	border-radius: 4px;
+	white-space: nowrap;
 }
 #remindertimer_manage, #remindertimer_manage th, #remindertimer_manage td {
 	color: white;
@@ -69,4 +70,12 @@
 
 #remindertimer_manage input[type=number] {
 	width: 40px;
+}
+
+.remindertimer_messages {
+	position: absolute;
+	top: 100px;
+	width: 100%;
+	font-size: 80px;
+	text-align: center;
 }

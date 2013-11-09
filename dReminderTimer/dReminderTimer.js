@@ -1,13 +1,13 @@
 var formatSeconds = function (seconds) {
 	var s = seconds % 60;
-	if (s < 9) {
+	if (s < 10) {
 		s = '0' + s;
 	}
 	return parseInt(seconds / 60) + ':' + s;
 };
 
 var ReminderDef = function (name, time, repeat, visible, hasConfirm, audio) {
-	this.name = ko.observable(name || 'New Timer');
+	this.name = ko.observable(name);
 	this.time = ko.observable(time || 0);
 	this.repeat = ko.observable(repeat);
 	this.visible = ko.observable(visible);
@@ -32,7 +32,7 @@ var ReminderDef = function (name, time, repeat, visible, hasConfirm, audio) {
 	this.isActive.subscribe(function (val) { this.currentTime(val ? this.time() : 0); }, this);
 };
 ReminderDef.prototype.recalcTime = function () {
-	this.time(this.timeMins() * 60 + this.timeSecs());
+	this.time(parseInt(this.timeMins() * 60 + parseInt(this.timeSecs())));
 };
 ReminderDef.prototype.toJson = function () {
 	return {
@@ -66,20 +66,18 @@ ReminderDef.prototype.tick = function () {
 						'<span class="text">' + this.name() + '</span>' +
 						'<button>Close</button>' +
 					'</div>');
-				model.reminderTimer.messageContainer.prepend(div);
+				model.reminderTimer.messageContainer.append(div);
 				$('button', div).click(function () {
 					div.remove();
 				});
 			} else {
 				var div = $('<div class="message"><span class="text">' + this.name() + '</span></div>');
-				model.reminderTimer.messageContainer.prepend(div);
+				model.reminderTimer.messageContainer.append(div);
 				setTimeout(function () {
 					div.remove();
 				}, 3000);
 			}
 		}
-
-		console.log('trigger: ' + this.name());
 	}
 };
 
@@ -106,6 +104,7 @@ model.reminderTimer = {
 		this.toggleManage = $.proxy(this.toggleManage, this);
 		this.addTimer = $.proxy(this.addTimer, this);
 		this.removeTimer = $.proxy(this.removeTimer, this);
+		this.clickQuickTimer = $.proxy(this.clickQuickTimer, this);
 
 		this.messageContainer = $('<div class="remindertimer_messages"></div>');
 
@@ -121,15 +120,15 @@ model.reminderTimer = {
 					'<button data-bind="click: model.reminderTimer.removeTimer">-</button>' +
 					'</td></tr>' +
 					'<!-- ko if: model.reminderTimer.selectedTimer -->' +
-						'<tr><th>Name</th><td><input data-bind="value: model.reminderTimer.selectedTimer().name" /></td></tr>' +
+						'<tr><th>Name</th><td><input data-bind="value: model.reminderTimer.selectedTimer().name" class="name" /></td></tr>' +
 						'<tr><th>Time</th><td>' +
 							'<input data-bind="value: model.reminderTimer.selectedTimer().timeMins" type="number" min="0"/>:' +
 							'<input  data-bind="value: model.reminderTimer.selectedTimer().timeSecs" type="number" min="0" max="59" step="10" /> (mm:ss)</td></tr>' +
 						'<tr><td colspan="2">When this timer expires, do the following</td></tr>' +
-						'<tr><th>Repeat</th><td><input data-bind="checked: model.reminderTimer.selectedTimer().repeat" type="checkbox" /> Repeat</td></tr>' +
-						'<tr><th>Visible</th><td><input data-bind="checked: model.reminderTimer.selectedTimer().visible" type="checkbox" /> Show a message</td></tr>' +
-						'<tr><th>Confirm</th><td><input data-bind="checked: model.reminderTimer.selectedTimer().hasConfirm" type="checkbox" /> Show message until confirmed</td></tr>' +
-						'<tr><th>Audio</th><td><input data-bind="checked: model.reminderTimer.selectedTimer().audio" type="checkbox" /> Play an audio queue</td></tr>' +
+						'<tr><th>Repeat</th><td><label><input data-bind="checked: model.reminderTimer.selectedTimer().repeat" type="checkbox" /> Repeat</label></td></tr>' +
+						'<tr><th>Visible</th><td><label><input data-bind="checked: model.reminderTimer.selectedTimer().visible" type="checkbox" /> Show a message</label></td></tr>' +
+						'<tr><th>Confirm</th><td><label><input data-bind="checked: model.reminderTimer.selectedTimer().hasConfirm" type="checkbox" /> Show message until confirmed</label></td></tr>' +
+						'<tr><th>Audio</th><td><label><input data-bind="checked: model.reminderTimer.selectedTimer().audio" type="checkbox" /> Play an audio queue</label></td></tr>' +
 					'<!-- /ko -->' +
 				'</table>' +
 			'</div>');
@@ -157,13 +156,13 @@ model.reminderTimer = {
 
 		this.timersEl.prepend(this.manage);
 		$('.div_player_list_panel').append(this.timersEl);
-		$(document.body).append(this.messageContainer);
+		$(document.body).prepend(this.messageContainer);
 
 		//Try really hard not to retain focus so we don't break keyboard shortcuts
 		$('select', this.container).change(this.blurAll);
 		$(':checkbox', this.container).click(this.blurAll);
 		$(document).keydown($.proxy(function (e) {
-			if (e.keyCode == 27) {
+			if (e.keyCode == 27) { //escape
 				this.blurAll();
 			}
 		}, this));
@@ -201,6 +200,9 @@ model.reminderTimer = {
 		var timer = new ReminderDef();
 		this.timers.push(timer);
 		this.selectedTimer(timer);
+
+		//Doesn't appear to work :(
+		$('.name', this.manage).focus().select();
 	},
 	removeTimer: function () {
 		this.timers.remove(this.selectedTimer());
@@ -216,6 +218,7 @@ model.reminderTimer = {
 	},
 
 	clickQuickTimer: function (e) {
+		this.quickTimers.remove(e);
 	},
 	clickQuick: function (time) {
 		var timer = new ReminderDef(this.quickTimerText(), time * 60, false, true, false, true);
@@ -234,7 +237,7 @@ model.reminderTimer = {
 	load: function () {
 		var data = window.localStorage.getItem('dReminderTimer_timers');
 		if (!data) {
-			//set a default
+			//first load, set a default
 			this.timers.push(new ReminderDef('Scout More!!!', 120));
 			return;
 		}
