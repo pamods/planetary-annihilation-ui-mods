@@ -50,9 +50,12 @@ function syncFunction() {
 
 element.click(syncFunction);
 
-//Hack in to the method that is called when [Start Annihilation] is clicked
-var oldAck = model.ackMessage;
-model.ackMessage = function() {
-    oldAck();
-    syncFunction();
-};
+// this is called the moment the player starts to play
+// works with reconnects as well
+var oldServer_state = handlers.server_state;
+handlers.server_state = function(m) {
+	oldServer_state(m);
+	if (m.state === 'playing') {
+		syncFunction();
+	}
+}
