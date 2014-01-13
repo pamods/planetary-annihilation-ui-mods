@@ -1,4 +1,4 @@
-$(function() {
+(function() {
 	var formatSeconds = function (seconds) {
 		var s = seconds % 60;
 		if (s < 10) {
@@ -254,4 +254,4 @@ $(function() {
 		}
 	};
 	model.reminderTimer.init();
-});
+})();
