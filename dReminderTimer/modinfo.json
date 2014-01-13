@@ -2,7 +2,7 @@
     "context": "client",
     "identifier": "com.pa.danzel.dReminderTimer",
     "display_name": "In Game Reminders Timer",
-    "description": "Improves the System View",
+    "description": "Provides a timer to show how long the current match has been running",
     "author": "danzel",
     "version": "1.2",
     "build": "58772",
