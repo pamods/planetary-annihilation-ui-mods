@@ -1,5 +1,14 @@
-.extra-mex-count {
+.div_planet_list_item_left {
+	position: relative;
+}
+
+.planet_mex_count {
 	position: absolute;
-	right: 51px;
-	top: 10px;
+	top: 12px;
+	left: 0;
+	
+	width: 36px;
+	
+	text-align: center;
+	font-size: 12px
 }
