@@ -1,6 +1,6 @@
 #in_game_timer  {
 	position: fixed;
-	right: 100px;
+	right: 6px;
 	font-size: 40px;
-	bottom: 2px;
+	bottom: 24px;
 }
